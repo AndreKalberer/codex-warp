@@ -7,17 +7,17 @@ This repo is a native Codex plugin marketplace for local/dev and Oz cloud-agent 
 .github/workflows/test.yml                GitHub Actions shell test workflow
 plugins/warp/.codex-plugin/plugin.json    Warp notification plugin manifest
 plugins/warp/hooks/hooks.json             Warp notification hook config
-plugins/warp/scripts/                     Warp notification hook scripts only
+plugins/warp/scripts/                     Warp notification hook scripts for POSIX shells and Windows PowerShell
 plugins/orchestration/.codex-plugin/plugin.json
 plugins/orchestration/hooks/hooks.json
-plugins/orchestration/scripts/            Oz parent-message listener, drain, and lifecycle scripts
+plugins/orchestration/scripts/            Oz parent-message listener, drain, and lifecycle scripts for POSIX shells and Windows PowerShell
 plugins/orchestration/skills/             Oz orchestration skills
 tests/test-hooks.sh                       Shell tests
 ```
 ## Plugins
 - `warp`: `SessionStart`, `Stop`, `PermissionRequest`, `UserPromptSubmit`, `PostToolUse` notifications for Warp.
 - `orchestration`: `SessionStart`, `UserPromptSubmit`, `PostToolUse`, `Stop`, `SessionEnd` parent-message delivery for Codex child runs, plus Oz skills.
-Hook commands use `${PLUGIN_ROOT}/scripts/...`.
+Hook commands use `${PLUGIN_ROOT}/scripts/...`; Windows overrides use Codex's `commandWindows` hook field to run `.ps1` entrypoints.
 ## Local install
 ```sh
 codex plugin marketplace add .
@@ -37,6 +37,7 @@ Current plugin version: `0.4.0`.
 Keep it in sync with Warp's Codex plugin manager minimum version.
 ## Requirements
 - Codex CLI with plugin support
-- `jq`
+- `jq` for POSIX shell hooks
+- Windows PowerShell for Windows hook overrides
 ## License
 MIT — see [LICENSE](LICENSE).

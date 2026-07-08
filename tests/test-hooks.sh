@@ -224,6 +224,18 @@ assert_file_exists "warp plugin manifest exists" "$REPO_ROOT/plugins/warp/.codex
 assert_file_exists "oz plugin manifest exists" "$REPO_ROOT/plugins/orchestration/.codex-plugin/plugin.json"
 assert_file_exists "warp hook config exists" "$REPO_ROOT/plugins/warp/hooks/hooks.json"
 assert_file_exists "oz hook config exists" "$REPO_ROOT/plugins/orchestration/hooks/hooks.json"
+assert_file_exists "warp powershell common exists" "$REPO_ROOT/plugins/warp/scripts/common.ps1"
+assert_file_exists "warp powershell session start hook exists" "$REPO_ROOT/plugins/warp/scripts/on-session-start.ps1"
+assert_file_exists "warp powershell stop hook exists" "$REPO_ROOT/plugins/warp/scripts/on-stop.ps1"
+assert_file_exists "warp powershell permission request hook exists" "$REPO_ROOT/plugins/warp/scripts/on-permission-request.ps1"
+assert_file_exists "warp powershell prompt submit hook exists" "$REPO_ROOT/plugins/warp/scripts/on-prompt-submit.ps1"
+assert_file_exists "warp powershell post tool use hook exists" "$REPO_ROOT/plugins/warp/scripts/on-post-tool-use.ps1"
+assert_file_exists "oz powershell common exists" "$REPO_ROOT/plugins/orchestration/scripts/oz-parent-common.ps1"
+assert_file_exists "oz powershell listener exists" "$REPO_ROOT/plugins/orchestration/scripts/oz-parent-listener.ps1"
+assert_file_exists "oz powershell session start hook exists" "$REPO_ROOT/plugins/orchestration/scripts/on-session-start.ps1"
+assert_file_exists "oz powershell drain hook exists" "$REPO_ROOT/plugins/orchestration/scripts/drain-mailbox.ps1"
+assert_file_exists "oz powershell stop hook exists" "$REPO_ROOT/plugins/orchestration/scripts/on-stop.ps1"
+assert_file_exists "oz powershell session end hook exists" "$REPO_ROOT/plugins/orchestration/scripts/on-session-end.ps1"
 assert_file_exists "github workflow exists" "$REPO_ROOT/.github/workflows/test.yml"
 assert_json_field "marketplace name" "$(cat "$REPO_ROOT/.agents/plugins/marketplace.json")" ".name" "codex-warp"
 assert_json_field "warp plugin name" "$(cat "$REPO_ROOT/plugins/warp/.codex-plugin/plugin.json")" ".name" "warp"
@@ -231,8 +243,18 @@ assert_json_field "oz plugin name" "$(cat "$REPO_ROOT/plugins/orchestration/.cod
 assert_contains "warp hooks use PLUGIN_ROOT" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-session-start.sh'
 assert_contains "warp hooks include prompt submit" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-prompt-submit.sh'
 assert_contains "warp hooks include post tool use" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-post-tool-use.sh'
+assert_json_field "warp session start uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" ".hooks.SessionStart[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/on-session-start.ps1"'
+assert_json_field "warp stop uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" ".hooks.Stop[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/on-stop.ps1"'
+assert_json_field "warp permission request uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" ".hooks.PermissionRequest[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/on-permission-request.ps1"'
+assert_json_field "warp prompt submit uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" ".hooks.UserPromptSubmit[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/on-prompt-submit.ps1"'
+assert_json_field "warp post tool use uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/warp/hooks/hooks.json")" ".hooks.PostToolUse[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/on-post-tool-use.ps1"'
 assert_contains "oz hooks use PLUGIN_ROOT" "$(cat "$REPO_ROOT/plugins/orchestration/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/drain-mailbox.sh UserPromptSubmit'
 assert_contains "oz hooks include session end" "$(cat "$REPO_ROOT/plugins/orchestration/hooks/hooks.json")" '${PLUGIN_ROOT}/scripts/on-session-end.sh'
+assert_json_field "oz session start uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/orchestration/hooks/hooks.json")" ".hooks.SessionStart[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/on-session-start.ps1"'
+assert_json_field "oz prompt submit uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/orchestration/hooks/hooks.json")" ".hooks.UserPromptSubmit[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/drain-mailbox.ps1" UserPromptSubmit'
+assert_json_field "oz post tool use uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/orchestration/hooks/hooks.json")" ".hooks.PostToolUse[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/drain-mailbox.ps1" PostToolUse'
+assert_json_field "oz stop uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/orchestration/hooks/hooks.json")" ".hooks.Stop[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/on-stop.ps1"'
+assert_json_field "oz session end uses Windows PowerShell" "$(cat "$REPO_ROOT/plugins/orchestration/hooks/hooks.json")" ".hooks.SessionEnd[0].hooks[0].commandWindows" 'powershell.exe -NoProfile -ExecutionPolicy Bypass -File "${PLUGIN_ROOT}/scripts/on-session-end.ps1"'
 
 
 echo ""
