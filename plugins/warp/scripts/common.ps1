@@ -136,9 +136,8 @@ function Send-WarpNotification {
             }
         }
     } catch {
-        try {
-            [Console]::Out.Write($message)
-        } catch {
-        }
+        # Hook stdout is reserved for Codex hook control JSON. If there is no
+        # attached console device, drop the notification rather than emitting
+        # OSC text to captured stdout and making the hook fail.
     }
 }
