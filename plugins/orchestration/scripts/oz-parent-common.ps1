@@ -361,12 +361,10 @@ function Start-ListenerIfNeeded {
     New-StateDir $StateDir
     Stop-Listener $StateDir
 
-    $arguments = @(
-        "-NoProfile",
-        "-ExecutionPolicy", "Bypass",
-        "-File", $ListenerScript,
-        $StateDir
-    )
+    # Start-Process joins ArgumentList arrays into a single command line. Quote
+    # both paths explicitly so listener startup also works from paths containing
+    # spaces, such as the default Windows user and plugin directories.
+    $arguments = '-NoProfile -ExecutionPolicy Bypass -File "{0}" "{1}"' -f $ListenerScript, $StateDir
     $process = Start-Process -FilePath "powershell.exe" -ArgumentList $arguments -WindowStyle Hidden -PassThru
     Set-Content -LiteralPath (Get-ListenerPidFile $StateDir) -Value $process.Id -Encoding ASCII
 }

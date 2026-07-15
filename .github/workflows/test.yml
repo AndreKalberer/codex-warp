@@ -18,3 +18,11 @@ jobs:
             bash "$f" || failed=1
           done
           exit $failed
+
+  windows-plugin-tests:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run PowerShell tests
+        shell: powershell
+        run: .\tests\test-hooks.ps1
