@@ -33,7 +33,7 @@ This uses a fake `oz` CLI and a temp `CODEX_HOME`.
 It validates parent-message staging/drain/blocking and plugin manifests.
 ## Versioning
 `plugins/warp/scripts/on-session-start.sh` emits `PLUGIN_VERSION`.
-Current plugin version: `0.4.0`.
+Current plugin version: `0.4.1`.
 Keep it in sync with Warp's Codex plugin manager minimum version.
 ## Requirements
 - Codex CLI with plugin support

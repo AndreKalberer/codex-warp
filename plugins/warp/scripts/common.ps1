@@ -112,6 +112,93 @@ function New-WarpPayload {
     return ($payload | ConvertTo-Json -Compress -Depth 50)
 }
 
+function Initialize-WarpConsoleWriter {
+    if ("WarpConsoleWriter" -as [type]) {
+        return
+    }
+
+    Add-Type -TypeDefinition @"
+using System;
+using System.Runtime.InteropServices;
+
+public static class WarpConsoleWriter
+{
+    private const uint GenericWrite = 0x40000000;
+    private const uint FileShareRead = 0x00000001;
+    private const uint FileShareWrite = 0x00000002;
+    private const uint OpenExisting = 3;
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern IntPtr CreateFileW(
+        string fileName,
+        uint desiredAccess,
+        uint shareMode,
+        IntPtr securityAttributes,
+        uint creationDisposition,
+        uint flagsAndAttributes,
+        IntPtr templateFile);
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+    private static extern bool WriteConsoleW(
+        IntPtr consoleOutput,
+        string buffer,
+        uint charsToWrite,
+        out uint charsWritten,
+        IntPtr reserved);
+
+    [DllImport("kernel32.dll")]
+    private static extern bool CloseHandle(IntPtr handle);
+
+    public static bool Write(string message)
+    {
+        IntPtr handle = CreateFileW(
+            "CONOUT$",
+            GenericWrite,
+            FileShareRead | FileShareWrite,
+            IntPtr.Zero,
+            OpenExisting,
+            0,
+            IntPtr.Zero);
+
+        if (handle == new IntPtr(-1))
+        {
+            return false;
+        }
+
+        try
+        {
+            int offset = 0;
+            while (offset < message.Length)
+            {
+                int chunkLength = Math.Min(16384, message.Length - offset);
+                if (offset + chunkLength < message.Length
+                    && char.IsHighSurrogate(message[offset + chunkLength - 1]))
+                {
+                    chunkLength--;
+                }
+
+                string chunk = message.Substring(offset, chunkLength);
+                uint written;
+                if (!WriteConsoleW(handle, chunk, (uint)chunk.Length, out written, IntPtr.Zero)
+                    || written == 0)
+                {
+                    return false;
+                }
+
+                offset += (int)written;
+            }
+
+            return true;
+        }
+        finally
+        {
+            CloseHandle(handle);
+        }
+    }
+}
+"@
+}
+
 function Send-WarpNotification {
     param(
         [string]$Title,
@@ -123,18 +210,8 @@ function Send-WarpNotification {
     $message = "$escape]777;notify;$Title;$Body$bell"
 
     try {
-        $stream = [System.IO.File]::Open("CONOUT$", [System.IO.FileMode]::Open, [System.IO.FileAccess]::Write, [System.IO.FileShare]::Write)
-        try {
-            $writer = New-Object System.IO.StreamWriter($stream, [Console]::OutputEncoding)
-            $writer.AutoFlush = $true
-            $writer.Write($message)
-        } finally {
-            if ($writer) {
-                $writer.Dispose()
-            } else {
-                $stream.Dispose()
-            }
-        }
+        Initialize-WarpConsoleWriter
+        [void][WarpConsoleWriter]::Write($message)
     } catch {
         # Hook stdout is reserved for Codex hook control JSON. If there is no
         # attached console device, drop the notification rather than emitting

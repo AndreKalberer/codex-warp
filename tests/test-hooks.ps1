@@ -112,6 +112,14 @@ function Test-WarpPayload {
     Assert-Equal "ok" $payload.detail "Warp payload extra field mismatch."
 }
 
+function Test-WarpConsoleWriterInterop {
+    . (Join-Path $repoRoot "plugins\warp\scripts\common.ps1")
+
+    Initialize-WarpConsoleWriter
+    Assert-True ($null -ne ("WarpConsoleWriter" -as [type])) "Warp console writer type was not loaded."
+    [void][WarpConsoleWriter]::Write("")
+}
+
 function Test-WarpHookEntryPoints {
     $oldProtocolVersion = $env:WARP_CLI_AGENT_PROTOCOL_VERSION
     $oldClientVersion = $env:WARP_CLIENT_VERSION
@@ -205,6 +213,7 @@ param(
 Test-PowerShellSyntax
 Test-WindowsHookCommands
 Test-WarpPayload
+Test-WarpConsoleWriterInterop
 Test-WarpHookEntryPoints
 Test-ListenerLaunchWithSpaces
 
